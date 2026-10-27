@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kasting — Messages</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=Inter:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+
+/* ── FOND grain texturé ── */
+body{
+  font-family:'Inter',sans-serif;
+  color:#1C1B18;
+  background:
+    radial-gradient(ellipse 80% 60% at 15% 20%, rgba(210,200,180,0.55) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 70% at 85% 75%, rgba(180,170,150,0.40) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 50% 50%, rgba(240,236,225,0.9) 0%, transparent 100%),
+    #EAE6DC;
+  position:relative;
+}
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  opacity:1;
+}
+
+:root{
+  --g-bg:rgba(248,245,238,0.58);
+  --g-bg-mid:rgba(248,245,238,0.72);
+  --g-bg-strong:rgba(250,248,243,0.82);
+  --g-border:rgba(255,255,255,0.52);
+  --g-border-inner:rgba(255,255,255,0.38);
+  --g-dark:rgba(14,13,11,0.52);
+  --g-dark-border:rgba(255,255,255,0.09);
+  --blur:blur(20px) saturate(1.6);
+  --blur-md:blur(14px) saturate(1.4);
+  --blur-sm:blur(10px) saturate(1.3);
+  --black:#0D0D0B;
+  --ink:#1C1B18;
+  --muted:#9B9890;
+  --border:rgba(0,0,0,0.07);
+  --shadow:0 2px 16px rgba(0,0,0,0.07),0 1px 4px rgba(0,0,0,0.04);
+  --shadow-lg:0 12px 40px rgba(0,0,0,0.12),0 3px 10px rgba(0,0,0,0.06);
+  --shadow-xl:0 24px 60px rgba(0,0,0,0.16),0 6px 20px rgba(0,0,0,0.08);
+  --green:#0F3320;
+  --green-bg:#E4F0E8;
+  --purple:#1E1650;
+  --purple-bg:#ECEAF8;
+  --amber:#3B2600;
+  --amber-bg:#F5EDDA;
+  --radius:16px;
+}
+
+/* ── LAYOUT ── */
+.app{
+  display:flex;
+  height:100vh;
+  position:relative;
+  z-index:1;
+}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:66px;
+  background:var(--g-dark);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+  border-right:1px solid var(--g-dark-border);
+  display:flex;flex-direction:column;align-items:center;
+  padding:20px 0 18px;flex-shrink:0;
+  border-radius:0 20px 20px 0;
+  z-index:10;
+}
+.s-logo{
+  font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:.12em;
+  color:rgba(255,255,255,.85);writing-mode:vertical-lr;transform:rotate(180deg);
+  margin-bottom:28px;
+}
+.s-nav{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;}
+.s-item{
+  width:38px;height:38px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:rgba(255,255,255,.22);
+  transition:all .2s;position:relative;
+}
+.s-item:hover{
+  color:rgba(255,255,255,.65);
+  background:rgba(255,255,255,.08);
+}
+.s-item.active{
+  background:rgba(255,255,255,.13);
+  color:rgba(255,255,255,.9);
+  box-shadow:0 0 0 1px rgba(255,255,255,.08);
+}
+.s-item svg{width:17px;height:17px;stroke:currentColor;stroke-width:1.5;fill:none;}
+.s-badge{
+  position:absolute;top:4px;right:4px;
+  min-width:15px;height:15px;border-radius:8px;
+  background:rgba(248,245,238,.95);color:var(--black);
+  font-size:8px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;
+  border:1.5px solid rgba(14,13,11,.35);
+  padding:0 3px;
+}
+.s-divider{width:24px;height:1px;background:rgba(255,255,255,.07);margin:6px 0;}
+.s-dot{width:6px;height:6px;border-radius:50%;background:rgba(76,175,128,.8);box-shadow:0 0 6px rgba(76,175,128,.5);margin-bottom:10px;}
+.s-avatar{
+  width:34px;height:34px;border-radius:50%;
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.15);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.7);
+  cursor:pointer;
+}
+
+/* ── COLS ── */
+.cols{display:flex;flex:1;min-width:0;height:100%;}
+
+/* ═══════════════════════════
+   COL 1 — THREAD LIST
+═══════════════════════════ */
+.col-threads{
+  width:286px;flex-shrink:0;
+  background:var(--g-bg);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+  border-right:1px solid var(--g-border);
+  display:flex;flex-direction:column;
+  height:100%;
+}
+
+.col-header{
+  padding:18px 16px 14px;
+  border-bottom:1px solid rgba(255,255,255,.3);
+  flex-shrink:0;
+  background:var(--g-bg-mid);
+  backdrop-filter:var(--blur-md);
+  -webkit-backdrop-filter:var(--blur-md);
+}
+.col-title-row{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:12px;
+}
+.col-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:22px;letter-spacing:.03em;color:var(--black);
+}
+.col-title span{color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.06em;margin-left:6px;vertical-align:middle;}
+.icon-btn{
+  width:30px;height:30px;border-radius:9px;
+  background:var(--g-bg-strong);
+  backdrop-filter:var(--blur-sm);
+  -webkit-backdrop-filter:var(--blur-sm);
+  border:1px solid var(--g-border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--muted);
+  box-shadow:var(--shadow);transition:all .15s;
+}
+.icon-btn:hover{color:var(--ink);border-color:rgba(0,0,0,.15);}
+.icon-btn svg{width:13px;height:13px;stroke:currentColor;stroke-width:1.5;fill:none;}
+
+/* search */
+.thread-search{
+  display:flex;align-items:center;gap:7px;
+  background:var(--g-bg-strong);
+  backdrop-filter:var(--blur-sm);
+  -webkit-backdrop-filter:var(--blur-sm);
+  border:1px solid var(--g-border);
+  border-radius:10px;padding:8px 12px;
+  box-shadow:var(--shadow);
+}
+.thread-search svg{width:13px;height:13px;stroke:var(--muted);stroke-width:1.5;fill:none;flex-shrink:0;}
+.thread-search input{
+  background:transparent;border:none;outline:none;
+  font-size:12px;color:var(--ink);font-family:'Inter',sans-serif;flex:1;
+}
+.thread-search input::placeholder{color:var(--muted);}
+
+/* story-style avatars */
+.stories{
+  display:flex;gap:12px;
+  padding:14px 16px;
+  overflow-x:auto;scrollbar-width:none;
+  border-bottom:1px solid rgba(255,255,255,.25);
+  flex-shrink:0;
+}
+.stories::-webkit-scrollbar{display:none;}
+.story{
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  cursor:pointer;flex-shrink:0;
+}
+.story-ring{
+  width:46px;height:46px;border-radius:50%;
+  padding:2.5px;
+  background:linear-gradient(135deg, var(--black) 0%, #555 100%);
+  box-shadow:var(--shadow);
+  transition:transform .18s;
+}
+.story-ring:hover{transform:scale(1.06);}
+.story-ring.muted{background:rgba(0,0,0,.12);}
+.story-inner{
+  width:100%;height:100%;border-radius:50%;
+  background:var(--g-bg-strong);
+  backdrop-filter:var(--blur-sm);
+  -webkit-backdrop-filter:var(--blur-sm);
+  border:2px solid rgba(248,245,238,.9);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);
+}
+.story-ring.me .story-inner{background:var(--black);color:rgba(248,245,238,.8);}
+.story-badge{
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+}
+.story-notif{
+  position:absolute;top:-2px;right:-2px;
+  width:15px;height:15px;border-radius:50%;
+  background:var(--black);color:rgba(248,245,238,.9);
+  font-family:'DM Mono',monospace;font-size:8px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;
+  border:2px solid rgba(234,230,220,.9);
+}
+.story-name{font-size:10px;color:var(--muted);max-width:46px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* thread list */
+.thread-list{
+  flex:1;overflow-y:auto;
+  padding:10px 10px;
+  scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.08) transparent;
+}
+.thread-list::-webkit-scrollbar{width:3px;}
+.thread-list::-webkit-scrollbar-thumb{background:rgba(0,0,0,.08);border-radius:2px;}
+
+.thread{
+  border-radius:14px;padding:12px;
+  margin-bottom:6px;cursor:pointer;
+  transition:all .2s;position:relative;
+  border:1px solid transparent;
+}
+.thread:hover{
+  background:var(--g-bg-strong);
+  backdrop-filter:var(--blur-sm);
+  -webkit-backdrop-filter:var(--blur-sm);
+  border-color:var(--g-border);
+  box-shadow:var(--shadow);
+  transform:translateX(2px);
+}
+.thread.active{
+  background:var(--g-dark);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+  border-color:var(--g-dark-border);
+  box-shadow:var(--shadow-lg);
+}
+.th-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;}
+.th-avs{display:flex;}
+.th-av{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--g-bg-strong);
+  backdrop-filter:var(--blur-sm);
+  -webkit-backdrop-filter:var(--blur-sm);
+  border:2px solid rgba(234,230,220,.8);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);
+  margin-left:-7px;flex-shrink:0;
+}
+.th-av:first-child{margin-left:0;}
+.thread.active .th-av{border-color:rgba(14,13,11,.4);}
+.th-unread{
+  width:19px;height:19px;border-radius:50%;
+  background:var(--black);color:rgba(248,245,238,.9);
+  font-family:'DM Mono',monospace;font-size:9px;font-weight:500;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;box-shadow:var(--shadow);
+}
+.thread.active .th-unread{background:rgba(248,245,238,.9);color:var(--black);}
+.th-cat{
+  font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.09em;text-transform:uppercase;
+  padding:2px 8px;border-radius:50px;
+  background:rgba(0,0,0,.06);color:var(--muted);
+  margin-bottom:4px;display:inline-block;
+}
+.thread.active .th-cat{background:rgba(248,245,238,.09);color:rgba(248,245,238,.4);}
+.th-name{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px;}
+.thread.active .th-name{color:rgba(248,245,238,.92);}
+.th-preview{
+  font-size:11px;color:var(--muted);line-height:1.45;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.thread.active .th-preview{color:rgba(248,245,238,.38);}
+.th-bot{display:flex;align-items:center;justify-content:space-between;margin-top:8px;}
+.th-date{font-family:'DM Mono',monospace;font-size:9px;color:rgba(0,0,0,.25);}
+.thread.active .th-date{color:rgba(248,245,238,.22);}
+.th-meta{display:flex;gap:7px;}
+.th-meta-i{display:flex;align-items:center;gap:2px;font-family:'DM Mono',monospace;font-size:9px;color:rgba(0,0,0,.2);}
+.thread.active .th-meta-i{color:rgba(248,245,238,.2);}
+.th-meta-i svg{width:9px;height:9px;stroke:currentColor;stroke-width:1.5;fill:none;}
+
+/* ═══════════════════════════
+   COL 2 — CONVERSATION
+═══════════════════════════ */
+.col-convo{
+  flex:1;min-width:0;
+  display:flex;flex-direction:column;
+  height:100%;
+  border-right:1px solid var(--g-border);
+  background:transparent;
+}
+
+/* convo header */
+.convo-header{
+  padding:14px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+  background:var(--g-bg-mid);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+  border-bottom:1px solid var(--g-border);
+}
+.ch-left{display:flex;align-items:center;gap:12px;}
+.ch-avs{display:flex;}
+.ch-av{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--g-bg-strong);
+  backdrop-filter:var(--blur-sm);
+  -webkit-backdrop-filter:var(--blur-sm);
+  border:2px solid rgba(234,230,220,.8);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);
+  margin-left:-9px;flex-shrink:0;box-shadow:var(--shadow);
+}
+.ch-av:first-child{margin-left:0;}
+.ch-info{}
+.ch-name{font-size:15px;font-weight:600;color:var(--ink);}
+.ch-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:1px;display:flex;align-items:center;gap:6px;}
+.online-dot{width:6px;height:6px;border-radius:50%;background:#4CAF80;box-shadow:0 0 5px rgba(76,175,128,.5);}
+.ch-right{display:flex;align-items:center;gap:6px;}
+.h-btn{
+  width:33px;height:33px;border-radius:10px;
+  background:var(--g-bg-strong);
+  backdrop-filter:var(--blur-sm);
+  -webkit-backdrop-filter:var(--blur-sm);
+  border:1px solid var(--g-border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--muted);
+  box-shadow:var(--shadow);transition:all .15s;
+}
+.h-btn:hover{color:var(--ink);border-color:rgba(0,0,0,.15);box-shadow:var(--shadow-lg);}
+.h-btn svg{width:14px;height:14px;stroke:currentColor;stroke-width:1.5;fill:none;}
+
+/* messages body */
+.convo-body{
+  flex:1;overflow-y:auto;
+  padding:22px 24px;
+  display:flex;flex-direction:column;gap:16px;
+  scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.07) transparent;
+}
+.convo-body::-webkit-scrollbar{width:3px;}
+.convo-body::-webkit-scrollbar-thumb{background:rgba(0,0,0,.07);border-radius:2px;}
+
+/* day separator */
+.day-sep{display:flex;align-items:center;gap:10px;margin:4px 0;}
+.day-line{flex:1;height:1px;background:rgba(0,0,0,.07);}
+.day-lbl{
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);
+  background:var(--g-bg-strong);
+  backdrop-filter:var(--blur-sm);
+  -webkit-backdrop-filter:var(--blur-sm);
+  border:1px solid var(--g-border);
+  padding:3px 10px;border-radius:50px;
+  box-shadow:var(--shadow);
+}
+
+/* message */
+.msg-wrap{display:flex;gap:10px;align-items:flex-end;}
+.msg-wrap.me{flex-direction:row-reverse;}
+.msg-av{
+  width:30px;height:30px;border-radius:50%;flex-shrink:0;
+  background:var(--g-bg-strong);
+  backdrop-filter:var(--blur-sm);
+  -webkit-backdrop-filter:var(--blur-sm);
+  border:1px solid var(--g-border);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);
+  box-shadow:var(--shadow);
+}
+.msg-group{display:flex;flex-direction:column;gap:3px;max-width:64%;}
+.msg-sender{font-size:10px;color:var(--muted);margin-bottom:2px;font-family:'DM Mono',monospace;letter-spacing:.04em;}
+.msg-wrap.me .msg-sender{text-align:right;}
+
+/* bubble */
+.bubble{
+  background:var(--g-bg-strong);
+  backdrop-filter:var(--blur-md);
+  -webkit-backdrop-filter:var(--blur-md);
+  border:1px solid var(--g-border);
+  border-radius:16px 16px 16px 4px;
+  padding:11px 15px;
+  font-size:13px;color:var(--ink);line-height:1.55;
+  box-shadow:var(--shadow);
+  width:fit-content;
+}
+.msg-wrap.me .bubble{
+  background:var(--g-dark);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+  border:1px solid var(--g-dark-border);
+  color:rgba(248,245,238,.9);
+  border-radius:16px 16px 4px 16px;
+  margin-left:auto;
+  box-shadow:var(--shadow-lg);
+}
+.bubble-time{
+  font-family:'DM Mono',monospace;font-size:9px;color:rgba(0,0,0,.22);
+  margin-top:3px;padding:0 2px;
+}
+.msg-wrap.me .bubble-time{text-align:right;color:rgba(248,245,238,.25);}
+
+/* casting widget — élément clé */
+.casting-widget{
+  background:var(--g-dark);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+  border:1px solid var(--g-dark-border);
+  border-radius:16px;padding:16px;
+  width:fit-content;max-width:300px;
+  box-shadow:var(--shadow-xl);
+  position:relative;overflow:hidden;
+}
+.cw-shimmer{
+  position:absolute;top:-30px;right:-30px;
+  width:120px;height:120px;border-radius:50%;
+  background:radial-gradient(circle,rgba(200,180,130,.08) 0%,transparent 70%);
+  pointer-events:none;
+}
+.cw-label{
+  font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;
+  color:rgba(248,245,238,.3);margin-bottom:8px;
+  display:flex;align-items:center;gap:6px;
+}
+.cw-label::before{content:'';width:12px;height:1px;background:rgba(248,245,238,.2);}
+.cw-title{font-family:'Bebas Neue',sans-serif;font-size:22px;color:rgba(248,245,238,.95);line-height:1;margin-bottom:6px;letter-spacing:.02em;}
+.cw-meta{font-size:11px;color:rgba(248,245,238,.4);line-height:1.5;margin-bottom:14px;}
+.cw-divider{height:1px;background:rgba(255,255,255,.07);margin-bottom:12px;}
+.cw-actions{display:flex;gap:7px;}
+.cw-btn{
+  flex:1;font-size:12px;font-weight:500;padding:8px 14px;
+  border-radius:50px;cursor:pointer;transition:all .18s;border:none;
+  text-align:center;
+}
+.cw-accept{
+  background:rgba(248,245,238,.95);color:var(--black);
+}
+.cw-accept:hover{background:#fff;}
+.cw-decline{
+  background:rgba(248,245,238,.07);
+  border:1px solid rgba(248,245,238,.12);
+  color:rgba(248,245,238,.45);
+}
+.cw-decline:hover{color:rgba(248,245,238,.75);border-color:rgba(248,245,238,.22);}
+
+/* attachment cards */
+.attach-wrap{display:flex;gap:8px;}
+.attach-card{
+  width:180px;border-radius:12px;overflow:hidden;
+  background:var(--g-bg-strong);
+  backdrop-filter:var(--blur-sm);
+  -webkit-backdrop-filter:var(--blur-sm);
+  border:1px solid var(--g-border);
+  box-shadow:var(--shadow);cursor:pointer;
+  transition:all .18s;
+}
+.attach-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px);}
+.attach-img{
+  height:100px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:22px;
+  letter-spacing:.05em;
+}
+.attach-info{padding:9px 11px;}
+.attach-name{font-size:11px;font-weight:500;color:var(--ink);}
+.attach-meta{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:2px;}
+
+/* input */
+.convo-input{
+  padding:12px 16px;flex-shrink:0;
+  background:var(--g-bg-mid);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+  border-top:1px solid var(--g-border);
+}
+.input-row{
+  display:flex;align-items:center;gap:8px;
+  background:var(--g-bg-strong);
+  backdrop-filter:var(--blur-md);
+  -webkit-backdrop-filter:var(--blur-md);
+  border:1px solid var(--g-border);
+  border-radius:50px;padding:9px 10px 9px 18px;
+  box-shadow:var(--shadow-lg);
+  transition:border-color .2s,box-shadow .2s;
+}
+.input-row:focus-within{
+  border-color:rgba(0,0,0,.18);
+  box-shadow:var(--shadow-xl);
+}
+.input-row input{
+  flex:1;background:transparent;border:none;outline:none;
+  font-size:13px;color:var(--ink);font-family:'Inter',sans-serif;
+}
+.input-row input::placeholder{color:var(--muted);}
+.i-btn{
+  width:30px;height:30px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--muted);transition:all .15s;flex-shrink:0;
+}
+.i-btn:hover{
+  color:var(--ink);
+  background:rgba(0,0,0,.05);
+}
+.i-btn svg{width:15px;height:15px;stroke:currentColor;stroke-width:1.5;fill:none;}
+.send-btn{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--g-dark);
+  backdrop-filter:var(--blur-sm);
+  -webkit-backdrop-filter:var(--blur-sm);
+  border:1px solid var(--g-dark-border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:rgba(248,245,238,.9);
+  transition:all .15s;flex-shrink:0;
+  box-shadow:var(--shadow);
+}
+.send-btn:hover{background:var(--black);box-shadow:var(--shadow-lg);}
+.send-btn svg{width:14px;height:14px;stroke:currentColor;stroke-width:1.5;fill:none;}
+
+/* ═══════════════════════════
+   COL 3 — PANEL
+═══════════════════════════ */
+.col-panel{
+  width:256px;flex-shrink:0;
+  background:var(--g-bg);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+  display:flex;flex-direction:column;
+  height:100%;overflow-y:auto;
+  padding:16px 14px 20px;gap:10px;
+  scrollbar-width:none;
+}
+.col-panel::-webkit-scrollbar{display:none;}
+
+/* glass card */
+.p-card{
+  background:var(--g-bg-strong);
+  backdrop-filter:var(--blur-md);
+  -webkit-backdrop-filter:var(--blur-md);
+  border:1px solid var(--g-border);
+  border-radius:var(--radius);
+  padding:14px;
+  box-shadow:var(--shadow);
+}
+.p-card.dark{
+  background:var(--g-dark);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+  border-color:var(--g-dark-border);
+  box-shadow:var(--shadow-lg);
+}
+.p-label{
+  font-family:'DM Mono',monospace;
+  font-size:9px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:10px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.dark .p-label{color:rgba(248,245,238,.27);}
+.p-action{font-size:10px;color:var(--muted);cursor:pointer;border-bottom:1px solid rgba(155,152,144,.4);line-height:1;}
+
+/* talent info */
+.ti-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.ti-av{
+  width:44px;height:44px;border-radius:12px;
+  background:var(--g-bg-mid);
+  backdrop-filter:var(--blur-sm);
+  -webkit-backdrop-filter:var(--blur-sm);
+  border:1px solid var(--g-border);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--muted);
+  flex-shrink:0;box-shadow:var(--shadow);
+}
+.ti-name{font-size:14px;font-weight:600;color:var(--ink);}
+.ti-role{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:2px;}
+.avail-row{display:flex;align-items:center;gap:5px;margin-top:4px;}
+.avail-dot{width:6px;height:6px;border-radius:50%;background:#4CAF80;box-shadow:0 0 5px rgba(76,175,128,.5);}
+.avail-txt{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--green);}
+
+.ti-stats{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px;}
+.ti-stat{
+  background:var(--g-bg-mid);
+  backdrop-filter:var(--blur-sm);
+  -webkit-backdrop-filter:var(--blur-sm);
+  border:1px solid var(--g-border);
+  border-radius:10px;padding:9px 10px;
+  box-shadow:0 1px 4px rgba(0,0,0,.04);
+}
+.ti-val{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--black);line-height:1;}
+.ti-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-top:2px;}
+
+.ti-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;}
+.ti-tag{
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.05em;text-transform:uppercase;
+  padding:3px 9px;border-radius:50px;
+  background:var(--g-bg-mid);
+  backdrop-filter:var(--blur-sm);
+  -webkit-backdrop-filter:var(--blur-sm);
+  border:1px solid var(--g-border);
+  color:var(--muted);
+}
+.ti-actions{display:flex;gap:7px;}
+.ti-btn{
+  flex:1;padding:8px;border-radius:10px;font-size:11px;font-weight:500;
+  cursor:pointer;text-align:center;
+  border:1px solid rgba(0,0,0,.1);
+  background:var(--g-bg-mid);
+  backdrop-filter:var(--blur-sm);
+  -webkit-backdrop-filter:var(--blur-sm);
+  color:var(--ink);transition:all .15s;
+}
+.ti-btn:hover{border-color:rgba(0,0,0,.2);box-shadow:var(--shadow);}
+.ti-btn.primary{
+  background:var(--g-dark);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+  color:rgba(248,245,238,.9);border-color:var(--g-dark-border);
+  box-shadow:var(--shadow);
+}
+.ti-btn.primary:hover{background:var(--black);}
+
+/* castings */
+.cp-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,.05);}
+.cp-item:last-child{border-bottom:none;}
+.cp-stripe{width:3px;border-radius:2px;align-self:stretch;min-height:28px;flex-shrink:0;}
+.cp-body{flex:1;min-width:0;}
+.cp-name{font-size:12px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cp-meta{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:1px;}
+.pill{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:50px;white-space:nowrap;flex-shrink:0;}
+.p-new{background:var(--green-bg);color:var(--green);}
+.p-cast{background:var(--purple-bg);color:var(--purple);}
+.p-rev{background:var(--amber-bg);color:var(--amber);}
+
+/* next meeting — dark glass */
+.nm-time{font-family:'Bebas Neue',sans-serif;font-size:44px;color:rgba(248,245,238,.95);line-height:1;letter-spacing:.02em;}
+.nm-sub{font-family:'DM Mono',monospace;font-size:9px;color:rgba(248,245,238,.28);margin-top:3px;letter-spacing:.06em;}
+.nm-title{font-size:12px;color:rgba(248,245,238,.6);margin-top:10px;font-weight:500;line-height:1.4;}
+
+/* others dark */
+.oc-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer;transition:opacity .15s;}
+.oc-row:last-child{border-bottom:none;}
+.oc-row:hover{opacity:.8;}
+.oc-av{width:28px;height:28px;border-radius:50%;background:rgba(248,245,238,.09);border:1px solid rgba(248,245,238,.08);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:9px;color:rgba(248,245,238,.45);flex-shrink:0;}
+.oc-name{font-size:12px;color:rgba(248,245,238,.55);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.oc-time{font-family:'DM Mono',monospace;font-size:9px;color:rgba(248,245,238,.18);flex-shrink:0;}
+.oc-unread{width:6px;height:6px;border-radius:50%;background:rgba(248,245,238,.7);flex-shrink:0;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <span class="s-logo">KASTiNG</span>
+    <nav class="s-nav">
+      <div class="s-item" title="Dashboard">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      </div>
+      <div class="s-item" title="Talents">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div class="s-item" title="Castings">
+        <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <div class="s-divider"></div>
+      <div class="s-item active" title="Messages">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <div class="s-badge">5</div>
+      </div>
+      <div class="s-item" title="Favoris">
+        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </div>
+      <div class="s-item" title="Paramètres" style="margin-top:auto;">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </div>
+    </nav>
+    <div class="s-dot"></div>
+    <div class="s-avatar">LA</div>
+  </aside>
+
+  <div class="cols">
+
+    <!-- COL 1 — THREADS -->
+    <div class="col-threads">
+      <div class="col-header">
+        <div class="col-title-row">
+          <div class="col-title">Messages <span>5</span></div>
+          <div class="icon-btn">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          </div>
+        </div>
+        <div class="thread-search">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Rechercher une conversation…" />
+        </div>
+      </div>
+
+      <!-- STORIES -->
+      <div class="stories">
+        <div class="story">
+          <div class="story-badge">
+            <div class="story-ring me"><div class="story-inner">LA</div></div>
+          </div>
+          <span class="story-name">Moi</span>
+        </div>
+        <div class="story">
+          <div class="story-badge">
+            <div class="story-ring"><div class="story-inner">AM</div></div>
+            <div class="story-notif">2</div>
+          </div>
+          <span class="story-name">Armani</span>
+        </div>
+        <div class="story">
+          <div class="story-badge">
+            <div class="story-ring"><div class="story-inner">DZ</div></div>
+            <div class="story-notif">1</div>
+          </div>
+          <span class="story-name">Dazed</span>
+        </div>
+        <div class="story">
+          <div class="story-badge">
+            <div class="story-ring muted"><div class="story-inner">BL</div></div>
+          </div>
+          <span class="story-name">Balenc.</span>
+        </div>
+        <div class="story">
+          <div class="story-badge">
+            <div class="story-ring muted"><div class="story-inner">NK</div></div>
+          </div>
+          <span class="story-name">Nike</span>
+        </div>
+        <div class="story">
+          <div class="story-badge">
+            <div class="story-ring muted"><div class="story-inner">PR</div></div>
+          </div>
+          <span class="story-name">Prada</span>
+        </div>
+      </div>
+
+      <!-- THREAD LIST -->
+      <div class="thread-list">
+
+        <div class="thread active">
+          <div class="th-top">
+            <div class="th-avs">
+              <div class="th-av">AM</div>
+              <div class="th-av">SB</div>
+            </div>
+            <div class="th-unread">2</div>
+          </div>
+          <div class="th-cat">Casting · Beauté</div>
+          <div class="th-name">Armani Beauty</div>
+          <div class="th-preview">Bonjour, nous souhaiterions vous proposer une collaboration pour notre campagne automne 2025…</div>
+          <div class="th-bot">
+            <span class="th-date">14 min</span>
+            <div class="th-meta">
+              <div class="th-meta-i"><svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>2</div>
+              <div class="th-meta-i"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>7</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="thread">
+          <div class="th-top">
+            <div class="th-avs"><div class="th-av">DZ</div></div>
+            <div class="th-unread">1</div>
+          </div>
+          <div class="th-cat">Éditorial</div>
+          <div class="th-name">Dazed Magazine</div>
+          <div class="th-preview">Votre profil a retenu notre attention pour l'éditorial S/S26, pouvez-vous confirmer votre disponibilité…</div>
+          <div class="th-bot">
+            <span class="th-date">2h</span>
+            <div class="th-meta"><div class="th-meta-i"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>4</div></div>
+          </div>
+        </div>
+
+        <div class="thread">
+          <div class="th-top">
+            <div class="th-avs">
+              <div class="th-av">BL</div>
+              <div class="th-av">CR</div>
+              <div class="th-av" style="font-size:8px;">+2</div>
+            </div>
+          </div>
+          <div class="th-cat">Défilé · Lookbook</div>
+          <div class="th-name">Balenciaga Casting</div>
+          <div class="th-preview">Suite à votre candidature pour le Lookbook SS26, l'équipe souhaite organiser un premier appel…</div>
+          <div class="th-bot">
+            <span class="th-date">Hier</span>
+            <div class="th-meta"><div class="th-meta-i"><svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>1</div></div>
+          </div>
+        </div>
+
+        <div class="thread">
+          <div class="th-top">
+            <div class="th-avs"><div class="th-av">NK</div></div>
+          </div>
+          <div class="th-cat">Pub · Lifestyle</div>
+          <div class="th-name">Nike — Casting Dept.</div>
+          <div class="th-preview">Merci pour votre candidature, nous reviendrons vers vous prochainement avec notre décision.</div>
+          <div class="th-bot"><span class="th-date">3j</span></div>
+        </div>
+
+        <div class="thread">
+          <div class="th-top">
+            <div class="th-avs"><div class="th-av">KS</div></div>
+          </div>
+          <div class="th-cat">Kasting</div>
+          <div class="th-name">Kasting Support</div>
+          <div class="th-preview">Votre profil est maintenant vérifié ✓ Bienvenue sur Kasting Pro !</div>
+          <div class="th-bot"><span class="th-date">5j</span></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- COL 2 — CONVO -->
+    <div class="col-convo">
+      <div class="convo-header">
+        <div class="ch-left">
+          <div class="ch-avs">
+            <div class="ch-av">AM</div>
+            <div class="ch-av">SB</div>
+          </div>
+          <div class="ch-info">
+            <div class="ch-name">Armani Beauty</div>
+            <div class="ch-sub">
+              <div class="online-dot"></div>
+              Sofia Brunetti · Casting Director
+            </div>
+          </div>
+        </div>
+        <div class="ch-right">
+          <div class="h-btn" title="Appel vidéo">
+            <svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+          </div>
+          <div class="h-btn" title="Profil">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          </div>
+          <div class="h-btn" title="Plus">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="convo-body" id="convo-body">
+
+        <div class="day-sep">
+          <div class="day-line"></div>
+          <span class="day-lbl">Aujourd'hui</span>
+          <div class="day-line"></div>
+        </div>
+
+        <!-- THEM -->
+        <div class="msg-wrap">
+          <div class="msg-av">AM</div>
+          <div class="msg-group">
+            <div class="msg-sender">Sofia Brunetti · Armani Beauty</div>
+            <div class="bubble">Bonjour Gabbriette, nous avons consulté votre profil sur Kasting et votre univers visuel correspond exactement à ce que nous recherchons pour notre campagne beauté automne 2025.</div>
+            <div class="bubble-time">09:14</div>
+          </div>
+        </div>
+
+        <div class="msg-wrap">
+          <div class="msg-av">AM</div>
+          <div class="msg-group">
+            <div class="bubble">Le brief est axé sur une esthétique forte — entre couture et attitude brute. Votre direction goth-éditoriale serait parfaite. Êtes-vous disponible pour un shooting à Paris les 18-19 juillet ?</div>
+            <div class="bubble-time">09:15</div>
+          </div>
+        </div>
+
+        <!-- CASTING WIDGET -->
+        <div class="msg-wrap">
+          <div class="msg-av">AM</div>
+          <div class="msg-group">
+            <div class="msg-sender">Proposition de casting</div>
+            <div class="casting-widget">
+              <div class="cw-shimmer"></div>
+              <div class="cw-label">Offre de casting</div>
+              <div class="cw-title">Campagne Beauté<br>Automne 2025</div>
+              <div class="cw-meta">
+                Paris · Studio Haussmann<br>
+                18 – 19 Juillet 2025<br>
+                Rémunération sur devis
+              </div>
+              <div class="cw-divider"></div>
+              <div class="cw-actions">
+                <button class="cw-btn cw-accept">Accepter →</button>
+                <button class="cw-btn cw-decline">Décliner</button>
+              </div>
+            </div>
+            <div class="bubble-time" style="color:var(--muted);">09:16</div>
+          </div>
+        </div>
+
+        <!-- ME -->
+        <div class="msg-wrap me">
+          <div class="msg-av">GB</div>
+          <div class="msg-group">
+            <div class="msg-sender">Gabbriette Bechtel</div>
+            <div class="bubble">Bonjour Sofia, merci pour votre message ! Le projet m'intéresse beaucoup, l'univers correspond exactement à ce que je recherche en ce moment.</div>
+            <div class="bubble-time">10:02</div>
+          </div>
+        </div>
+
+        <div class="msg-wrap me">
+          <div class="msg-av">GB</div>
+          <div class="msg-group">
+            <div class="bubble">Je suis disponible sur ces dates. Pourriez-vous me transmettre le brief complet et les détails sur la direction artistique ?</div>
+            <div class="bubble-time">10:04</div>
+          </div>
+        </div>
+
+        <!-- ATTACHMENTS -->
+        <div class="msg-wrap">
+          <div class="msg-av">AM</div>
+          <div class="msg-group">
+            <div class="msg-sender">Sofia Brunetti</div>
+            <div class="attach-wrap">
+              <div class="attach-card">
+                <div class="attach-img" style="background:linear-gradient(135deg,rgba(30,26,20,.7),rgba(20,18,14,.8));color:rgba(248,245,238,.15);font-size:18px;">BRIEF</div>
+                <div class="attach-info">
+                  <div class="attach-name">Brief_AW25_Beauté.pdf</div>
+                  <div class="attach-meta">2.4 MB · PDF</div>
+                </div>
+              </div>
+              <div class="attach-card">
+                <div class="attach-img" style="background:linear-gradient(135deg,rgba(200,190,170,.4),rgba(180,170,150,.5));color:rgba(0,0,0,.15);font-size:18px;">MOOD</div>
+                <div class="attach-info">
+                  <div class="attach-name">Moodboard_AW25.jpg</div>
+                  <div class="attach-meta">4.1 MB · Image</div>
+                </div>
+              </div>
+            </div>
+            <div class="bubble-time" style="color:var(--muted);">10:28</div>
+          </div>
+        </div>
+
+        <div class="msg-wrap">
+          <div class="msg-av">AM</div>
+          <div class="msg-group">
+            <div class="bubble">La DA est signée Nicolas Romero. L'esthétique est très proche de votre book — couture brute, lumière naturelle, attitude forte. Nous avons aussi prévu une session vidéo.</div>
+            <div class="bubble-time">10:31</div>
+          </div>
+        </div>
+
+        <!-- ME -->
+        <div class="msg-wrap me">
+          <div class="msg-av">GB</div>
+          <div class="msg-group">
+            <div class="bubble">Parfait, j'ai regardé le brief — c'est exactement dans mon univers. Je confirme ma disponibilité pour les deux jours. 🤝</div>
+            <div class="bubble-time">Maintenant</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- INPUT -->
+      <div class="convo-input">
+        <div class="input-row">
+          <div class="i-btn" title="Joindre un fichier">
+            <svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+          </div>
+          <input type="text" placeholder="Écrire un message…" />
+          <div class="i-btn" title="Emoji">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+          </div>
+          <div class="i-btn" title="Vocal">
+            <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>
+          </div>
+          <button class="send-btn">
+            <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- COL 3 — PANEL -->
+    <div class="col-panel">
+
+      <!-- TALENT INFO -->
+      <div class="p-card">
+        <div class="p-label">Talent <span class="p-action">Voir le profil</span></div>
+        <div class="ti-header">
+          <div class="ti-av">GB</div>
+          <div>
+            <div class="ti-name">Gabbriette Bechtel</div>
+            <div class="ti-role">Mannequin · New York</div>
+            <div class="avail-row">
+              <div class="avail-dot"></div>
+              <span class="avail-txt">Disponible</span>
+            </div>
+          </div>
+        </div>
+        <div class="ti-stats">
+          <div class="ti-stat"><div class="ti-val">48</div><div class="ti-lbl">Projets</div></div>
+          <div class="ti-stat"><div class="ti-val">96%</div><div class="ti-lbl">Réponse</div></div>
+          <div class="ti-stat"><div class="ti-val">177</div><div class="ti-lbl">cm</div></div>
+          <div class="ti-stat"><div class="ti-val">24</div><div class="ti-lbl">ans</div></div>
+        </div>
+        <div class="ti-tags">
+          <span class="ti-tag">Éditorial</span>
+          <span class="ti-tag">Beauté</span>
+          <span class="ti-tag">Goth</span>
+          <span class="ti-tag">Luxe</span>
+        </div>
+        <div class="ti-actions">
+          <button class="ti-btn">Book</button>
+          <button class="ti-btn primary">+ Casting</button>
+        </div>
+      </div>
+
+      <!-- CASTINGS LIÉS -->
+      <div class="p-card">
+        <div class="p-label">Castings liés <span class="p-action">Gérer</span></div>
+        <div class="cp-item">
+          <div class="cp-stripe" style="background:#0F3320;"></div>
+          <div class="cp-body"><div class="cp-name">Campagne Beauté AW25</div><div class="cp-meta">18–19 Juillet · Paris</div></div>
+          <span class="pill p-new">Actif</span>
+        </div>
+        <div class="cp-item">
+          <div class="cp-stripe" style="background:#534AB7;"></div>
+          <div class="cp-body"><div class="cp-name">Lookbook Printemps</div><div class="cp-meta">Shooting · Paris</div></div>
+          <span class="pill p-cast">Casté</span>
+        </div>
+        <div class="cp-item">
+          <div class="cp-stripe" style="background:#A06020;"></div>
+          <div class="cp-body"><div class="cp-name">Pub TV Fragrance</div><div class="cp-meta">Vidéo · Milan</div></div>
+          <span class="pill p-rev">Revue</span>
+        </div>
+      </div>
+
+      <!-- NEXT MEETING — dark glass -->
+      <div class="p-card dark">
+        <div class="p-label" style="color:rgba(248,245,238,.28);">Prochain RDV</div>
+        <div class="nm-time">14:00</div>
+        <div class="nm-sub">Aujourd'hui · dans 00:32:14</div>
+        <div class="nm-title">
+          Brief Campagne AW25<br>
+          <span style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(248,245,238,.28);">Sofia B. · Armani Beauty · Zoom</span>
+        </div>
+      </div>
+
+      <!-- AUTRES CONVERSATIONS dark -->
+      <div class="p-card dark">
+        <div class="p-label" style="color:rgba(248,245,238,.28);">Autres conversations</div>
+        <div class="oc-row">
+          <div class="oc-av">DZ</div>
+          <span class="oc-name">Dazed Magazine</span>
+          <span class="oc-time">2h</span>
+          <div class="oc-unread"></div>
+        </div>
+        <div class="oc-row">
+          <div class="oc-av">BL</div>
+          <span class="oc-name">Balenciaga Casting</span>
+          <span class="oc-time">Hier</span>
+        </div>
+        <div class="oc-row">
+          <div class="oc-av">NK</div>
+          <span class="oc-name">Nike — Casting Dept.</span>
+          <span class="oc-time">3j</span>
+        </div>
+        <div class="oc-row">
+          <div class="oc-av">PR</div>
+          <span class="oc-name">Prada Press</span>
+          <span class="oc-time">1 sem</span>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+const body = document.getElementById('convo-body');
+if(body) body.scrollTop = body.scrollHeight;
+</script>
+</body>
+</html>
